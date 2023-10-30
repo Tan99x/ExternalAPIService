@@ -1,20 +1,27 @@
 package com.ext.apiservice.controller;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ext.apiservice.service.modal.CardInfoRequest;
+import com.ext.apiservice.service.modal.MerchantKeyRequest;
 import com.ext.apiservice.service.modal.MerchantKeyResponse;
+import com.ext.apiservice.utils.CommonUtils;
+import com.ext.apiservice.utils.HttpConnector;
+import com.ext.apiservice.utils.HttpConnectorResponse;
 import com.google.gson.Gson;
 
 @RestController
 public class ExternalAPIController {
+
+	@Autowired
+	HttpConnector httpConnector;
 
 	@RequestMapping(value = "/processCard", method = RequestMethod.POST)
 	public String processCard() {
@@ -22,52 +29,32 @@ public class ExternalAPIController {
 	}
 
 	@RequestMapping(value = "/processCard1", method = RequestMethod.GET)
-	public String processCard1() {
-		HttpRequest.BodyPublisher merchantCardRequest = HttpRequest.BodyPublishers
-				.ofString("{\r\n" + "    \"vendorName\": \"sandbox\"\r\n" + "}");
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create("https://pi-test.sagepay.com/api/v1/merchant-session-keys" + ""))
-				.header("Content-Type", "application/json")
-				.header("Authorization",
-						"Basic aEpZeHN3N0hMYmo0MGNCOHVkRVM4Q0RSRkxodUo4RzU0TzZyRHBVWHZFNmhZRHJyaWE6bzJpSFNyRnliWU1acG1XT1FNdWhzWFA1MlY0ZkJ0cHVTRHNocktEU1dzQlkxT2lONmh3ZDlLYjEyejRqNVVzNXU=")
-
-				.method("POST", merchantCardRequest).build();
-
-		HttpResponse<String> response = null;
+	public String processCard1(@RequestBody CardInfoRequest cardInfoRequest) {
 		Gson gson = new Gson();
-		try {
-			response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		MerchantKeyResponse res = gson.fromJson(response.body(), MerchantKeyResponse.class);
+		MerchantKeyRequest merchantKeyRequest = new MerchantKeyRequest();
+		Map<String, String> header = new HashMap<>();
+		header.put("Content-Type", "application/json");
+		String body = CommonUtils.dumpObject(merchantKeyRequest);
+		HttpConnectorResponse response = httpConnector
+				.postApiCall("https://pi-test.sagepay.com/api/v1/merchant-session-keys", header, body);
+
+		MerchantKeyResponse res = gson.fromJson(response.getResponse(), MerchantKeyResponse.class);
 		System.out.println(res.getExpiry());
 		System.out.println(res.getMerchantSessionKey());
 
-		HttpRequest.BodyPublisher cardIdentifierRequest = HttpRequest.BodyPublishers
-				.ofString("{\r\n" + "    \"cardDetails\": {\r\n" + "        \"cardholderName\": \"S Squarepants\",\r\n"
-						+ "        \"cardNumber\": \"4929000000006\",\r\n" + "        \"expiryDate\": \"1130\",\r\n"
-						+ "        \"securityCode\": \"123\"\r\n" + "    }\r\n" + "}");
+		String reqBody = CommonUtils.dumpObject(cardInfoRequest);
 
 		String auth = "Bearer " + res.getMerchantSessionKey();
 
-		HttpRequest cardIdentifierReq = HttpRequest.newBuilder()
-				.uri(URI.create("https://pi-test.sagepay.com/api/v1/card-identifiers" + ""))
-				.header("Content-Type", "application/json").header("Authorization", auth)
-				.method("POST", cardIdentifierRequest).build();
+		String cardIdentifierUrl = "https://pi-test.sagepay.com/api/v1/card-identifiers";
+		Map<String, String> headerMap = new HashMap<>();
+		header.put("Content-Type", "application/json");
+		header.put("Authorization", auth);
 
-		HttpResponse<String> response1 = null;
-		try {
-			response1 = HttpClient.newHttpClient().send(cardIdentifierReq, HttpResponse.BodyHandlers.ofString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		HttpConnectorResponse cardResp = null;
+		cardResp = httpConnector.postApiCall(cardIdentifierUrl, headerMap, reqBody);
 
-		return response1.body();
+		return cardResp.getResponse();
 
 	}
 
