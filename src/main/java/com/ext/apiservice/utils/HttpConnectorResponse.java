@@ -25,4 +25,6 @@ public class HttpConnectorResponse implements Serializable {
 	public void setResponse(String response) {
 		this.response = response;
 	}
+	
+	
 }

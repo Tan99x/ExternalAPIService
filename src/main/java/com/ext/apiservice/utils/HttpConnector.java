@@ -1,6 +1,7 @@
 package com.ext.apiservice.utils;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -13,6 +14,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import io.micrometer.common.util.StringUtils;
 
 @Component
 public class HttpConnector {
@@ -60,4 +63,9 @@ public class HttpConnector {
 		return httpConnectorResponse;
 	}
 
+	public static boolean isResponseExist(HttpConnectorResponse httpConnectorResponse) {
+		return Optional.ofNullable(httpConnectorResponse)
+				.filter(p -> p.getErrorCode() == 200 && StringUtils.isNotBlank(p.getResponse())).map(p -> true)
+				.orElse(false);
+	}
 }
