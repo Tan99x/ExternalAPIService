@@ -42,6 +42,10 @@ public class ExternalServiceImpl implements ExternalService {
 		MerchantKeyRequest merchantKeyRequest = new MerchantKeyRequest();
 		Map<String, String> header = new HashMap<>();
 		header.put("Content-Type", "application/json");
+		String auth = "Bearer "
+				+ "aEpZeHN3N0hMYmo0MGNCOHVkRVM4Q0RSRkxodUo4RzU0TzZyRHBVWHZFNmhZRHJyaWE6bzJpSFNyRnliWU1acG1XT1FNdWhzWFA1MlY0ZkJ0cHVTRHNocktEU1dzQlkxT2lONmh3ZDlLYjEyejRqNVVzNXU=";
+		header.put("Authorization", auth);
+		merchantKeyRequest.setVendorName("sandbox");
 		String body = CommonUtils.dumpObject(merchantKeyRequest);
 		HttpConnectorResponse httpResponse = httpConnector.postApiCall(sessionKeyApiUrl, header, body);
 		if (HttpConnector.isResponseExist(httpResponse)) {
@@ -51,10 +55,9 @@ public class ExternalServiceImpl implements ExternalService {
 
 			String reqBody = CommonUtils.dumpObject(cardInfoRequest);
 
-			String auth = "Bearer " + res.getMerchantSessionKey();
+			auth = "Bearer " + res.getMerchantSessionKey();
 
 			Map<String, String> headerMap = new HashMap<>();
-			header.put("Content-Type", "application/json");
 			header.put("Authorization", auth);
 
 			HttpConnectorResponse cardResp = httpConnector.postApiCall(cardIdentifierApiUrl, headerMap, reqBody);
