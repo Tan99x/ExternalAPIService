@@ -11,9 +11,16 @@ import org.springframework.stereotype.Service;
 
 import com.ext.apiservice.service.ExternalService;
 import com.ext.apiservice.service.modal.AutheriseTxnRequestDTO;
+import com.ext.apiservice.service.modal.BillingAddress;
+import com.ext.apiservice.service.modal.Card;
+import com.ext.apiservice.service.modal.CardIdentifierResponse;
 import com.ext.apiservice.service.modal.CardInfoRequest;
+import com.ext.apiservice.service.modal.CredentialType;
 import com.ext.apiservice.service.modal.MerchantKeyRequest;
 import com.ext.apiservice.service.modal.MerchantKeyResponse;
+import com.ext.apiservice.service.modal.PaymentMethod;
+import com.ext.apiservice.service.modal.ShippingDetails;
+import com.ext.apiservice.service.modal.StrongCustomerAuthentication;
 import com.ext.apiservice.service.modal.TransactionRequestDTO;
 import com.ext.apiservice.utils.CommonUtils;
 import com.ext.apiservice.utils.HttpConnector;
@@ -54,19 +61,17 @@ public class ExternalServiceImpl implements ExternalService {
 				MerchantKeyResponse res = gson.fromJson(httpResponse.getResponse(), MerchantKeyResponse.class);
 				System.out.println(res.getExpiry());
 				System.out.println(res.getMerchantSessionKey());
-
 				String reqBody = CommonUtils.dumpObject(cardInfoRequest);
-
 				auth = "Bearer " + res.getMerchantSessionKey();
-
 				Map<String, String> headerMap = new HashMap<>();
 				header.put("Authorization", auth);
-
 				HttpConnectorResponse cardResp = httpConnector.postApiCall(cardIdentifierApiUrl, headerMap, reqBody);
 				if (HttpConnector.isResponseExist(httpResponse)) {
-					cardResp.getResponse();
+					CardIdentifierResponse cardRes = gson.fromJson(cardResp.getResponse(),
+							CardIdentifierResponse.class);
 
-					TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO();
+					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes);
+
 					String txnReqBody = CommonUtils.dumpObject(transactionRequestDTO);
 					HttpConnectorResponse txnResp = httpConnector.postApiCall(cardTxnApiUrl, headerMap, txnReqBody);
 					if (HttpConnector.isResponseExist(txnResp)) {
@@ -86,6 +91,72 @@ public class ExternalServiceImpl implements ExternalService {
 
 		}
 		return null;
+	}
+
+	private TransactionRequestDTO getTransactionRequestDTO(Properties prop, MerchantKeyResponse res,
+			CardIdentifierResponse cardRes) {
+		Gson gson = new Gson();
+
+		TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO();
+		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+		transactionRequestDTO.setVendorName(prop.getProperty("vendorType"));
+		PaymentMethod paymentMethod = new PaymentMethod();
+		Card card = getCard(res, cardRes);
+		paymentMethod.setCard(card);
+		transactionRequestDTO.setPaymentMethod(paymentMethod);
+		transactionRequestDTO.setVendorTxCode(prop.getProperty("transactionType"));
+		ShippingDetails shippingDetails = gson.fromJson(
+				"{\r\n" + "        \"recipientFirstName\": \"shippingFname\",\r\n"
+						+ "        \"recipientLastName\": \"shippingLName\",\r\n"
+						+ "        \"shippingAddress1\": \"shipaddress1\",\r\n"
+						+ "        \"shippingCity\": \"shipcity\",\r\n" + "        \"shippingCountry\": \"GB\",\r\n"
+						+ "        \"shippingAddress2\": \"shipaddress2\",\r\n"
+						+ "        \"shippingAddress3\": \"shipaddress3\",\r\n"
+						+ "        \"shippingPostalCode\": \"PC1 8DE\"\r\n" + "  \r\n" + "    }",
+				ShippingDetails.class);
+		transactionRequestDTO.setShippingDetails(shippingDetails);
+
+		StrongCustomerAuthentication strongCustomerAuthentication = gson.fromJson("{\r\n"
+				+ "        \"notificationURL\": \"https://www.opayolabs.co.uk/OpayoDemo/pi_callback\",\r\n"
+				+ "        \"browserIP\": \"158.175.142.169\",\r\n"
+				+ "        \"browserAcceptHeader\": \"text/html, application/json\",\r\n"
+				+ "        \"browserJavascriptEnabled\": true,\r\n"
+				+ "        \"browserUserAgent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:67.0) Gecko/20100101 Firefox/67.0\",\r\n"
+				+ "        \"challengeWindowSize\": \"Small\",\r\n"
+				+ "        \"transType\": \"GoodsAndServicePurchase\",\r\n"
+				+ "        \"browserLanguage\": \"en-GB\",\r\n" + "        \"browserJavaEnabled\": true,\r\n"
+				+ "        \"browserColorDepth\": \"16\",\r\n" + "        \"browserScreenHeight\": \"768\",\r\n"
+				+ "        \"browserScreenWidth\": \"1200\",\r\n" + "        \"browserTZ\": \"+300\",\r\n"
+				+ "        \"acctID\": \"Additional information\",\r\n" + "\r\n"
+				+ "        \"website\": \"https://www.opayolabs.co.uk\"\r\n" + "    }",
+				StrongCustomerAuthentication.class);
+		transactionRequestDTO.setStrongCustomerAuthentication(strongCustomerAuthentication);
+
+		BillingAddress billingAddress = gson.fromJson("{\r\n" + "        \"address1\": \"address1\",\r\n"
+				+ "        \"city\": \"billingcity\",\r\n" + "        \"country\": \"GB\",\r\n"
+				+ "        \"address2\": \"addressline2\",\r\n" + "        \"address3\": \"addressline3\",\r\n"
+				+ "        \"postalCode\": \"PC1 8DE\"\r\n" + "        \r\n" + "    }", BillingAddress.class);
+		transactionRequestDTO.setBillingAddress(billingAddress);
+
+		CredentialType credentialType = gson
+				.fromJson("{\r\n" + "        \"cofUsage\": \"First\",\r\n" + "        \"initiatedType\": \"CIT\",\r\n"
+						+ "        \"mitType\": \"Unscheduled\"\r\n" + "\r\n" + "    }", CredentialType.class);
+		transactionRequestDTO.setCredentialType(credentialType);
+		
+		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+		return transactionRequestDTO;
+	}
+
+	private Card getCard(MerchantKeyResponse res, CardIdentifierResponse cardRes) {
+		Card card = new Card();
+		card.setMerchantSessionKey(res.getMerchantSessionKey());
+		card.setCardIdentifier(cardRes.getCardIdentifier());
+		card.setReusable(false);
+		card.setSave(true);
+		return card;
 	}
 
 }
