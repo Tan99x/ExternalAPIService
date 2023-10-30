@@ -9,12 +9,12 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ext.apiservice.service.ExternalService;
 import com.ext.apiservice.service.modal.AutheriseTxnRequestDTO;
+import com.ext.apiservice.service.modal.AutheriseTxnResponseDTO;
 import com.ext.apiservice.service.modal.BillingAddress;
 import com.ext.apiservice.service.modal.Card;
 import com.ext.apiservice.service.modal.CardIdentifierResponse;
@@ -38,7 +38,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ExternalServiceImpl implements ExternalService {
 
 	private static final Log LOG = LogFactory.getLog(ExternalService.class);
-	
+
 	@Autowired
 	HttpConnector httpConnector;
 
@@ -78,11 +78,13 @@ public class ExternalServiceImpl implements ExternalService {
 							CardIdentifierResponse.class);
 					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes);
 					String txnReqBody = CommonUtils.dumpObject(transactionRequestDTO);
+					auth = "Basic " + prop.getProperty("authToken");
+					header.put("Authorization", auth);
 					HttpConnectorResponse txnResp = httpConnector.postApiCall(cardTxnApiUrl, header, txnReqBody);
 					System.out.println(txnResp);
 					if (HttpConnector.isResponseExist(txnResp)) {
 						AutheriseTxnRequestDTO autheriseTxnRequestDTO = new AutheriseTxnRequestDTO();
-						autheriseTxnRequestDTO.setAmount(Double.parseDouble(prop.getProperty("amount")));
+						autheriseTxnRequestDTO.setAmount(Integer.parseInt(prop.getProperty("amount")));
 						autheriseTxnRequestDTO.setApplyAvsCvcCheck(prop.getProperty("applyAvsCvcCheck"));
 						autheriseTxnRequestDTO.setCv2(prop.getProperty("cv2"));
 						autheriseTxnRequestDTO.setDescription(prop.getProperty("description"));
@@ -90,11 +92,12 @@ public class ExternalServiceImpl implements ExternalService {
 						autheriseTxnRequestDTO.setTransactionType(prop.getProperty("transactionType"));
 						autheriseTxnRequestDTO.setVendorTxCode(prop.getProperty("vendorType"));
 						String authReqBody = CommonUtils.dumpObject(autheriseTxnRequestDTO);
-						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, header,
-								authReqBody);
+						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, header, authReqBody);
 						System.out.println(authResp);
 						if (HttpConnector.isResponseExist(authResp)) {
-
+							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
+									AutheriseTxnResponseDTO.class);
+							return authRes.getAcsUrl();
 						}
 					}
 				}
@@ -118,7 +121,7 @@ public class ExternalServiceImpl implements ExternalService {
 		Card card = getCard(res, cardRes);
 		paymentMethod.setCard(card);
 		transactionRequestDTO.setPaymentMethod(paymentMethod);
-		transactionRequestDTO.setVendorTxCode(prop.getProperty("transactionType"));
+		transactionRequestDTO.setVendorTxCode(cardRes.getCardType());
 		ShippingDetails shippingDetails = gson.fromJson(
 				"{\r\n" + "        \"recipientFirstName\": \"shippingFname\",\r\n"
 						+ "        \"recipientLastName\": \"shippingLName\",\r\n"
@@ -156,8 +159,7 @@ public class ExternalServiceImpl implements ExternalService {
 				.fromJson("{\r\n" + "        \"cofUsage\": \"First\",\r\n" + "        \"initiatedType\": \"CIT\",\r\n"
 						+ "        \"mitType\": \"Unscheduled\"\r\n" + "\r\n" + "    }", CredentialType.class);
 		transactionRequestDTO.setCredentialType(credentialType);
-
-		transactionRequestDTO.setAmount(Double.parseDouble("1000"));
+		transactionRequestDTO.setAmount(Integer.parseInt(prop.getProperty("amount")));
 		transactionRequestDTO.setCurrency(prop.getProperty("currency"));
 		transactionRequestDTO.setDescription(prop.getProperty("description"));
 		transactionRequestDTO.setSettlementReferenceText(prop.getProperty("settlementReferenceText"));
