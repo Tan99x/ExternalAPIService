@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ext.apiservice.configutation.ConfigProperties;
 import com.ext.apiservice.service.ExternalService;
 import com.ext.apiservice.service.modal.AutheriseTxnRequestDTO;
 import com.ext.apiservice.service.modal.CardInfoRequest;
@@ -25,12 +26,15 @@ public class ExternalServiceImpl implements ExternalService {
 
 	@Autowired
 	HttpConnector httpConnector;
+	
+	@Autowired
+	ConfigProperties configProperties;
 
 	@Override
 	public String processCard(CardInfoRequest cardInfoRequest, HttpServletRequest request,
 			HttpServletResponse response) {
 		Gson gson = new Gson();
-		String sessionKeyApiUrl = "https://pi-test.sagepay.com/api/v1/merchant-session-keys";
+		String sessionKeyApiUrl = configProperties.getSessionKeyApiUrl();
 		String cardIdentifierApiUrl = "https://pi-test.sagepay.com/api/v1/card-identifiers";
 		String cardTxnApiUrl = "https://pi-test.sagepay.com/api/v1/card-identifiers";
 		String authorizeTxnApiUrl = "https://pi-test.sagepay.com/api/v1/card-identifiers";
