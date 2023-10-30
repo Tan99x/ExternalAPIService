@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.ext.apiservice.service.ExternalService;
 import com.ext.apiservice.service.modal.AutheriseTxnRequestDTO;
@@ -19,6 +20,7 @@ import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Service
 public class ExternalServiceImpl implements ExternalService {
 
 	@Autowired
