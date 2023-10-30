@@ -34,7 +34,7 @@ public class HttpConnector {
 			HttpEntity entity = response.getEntity();
 			EntityUtils.consume(entity);
 		} catch (Exception e) {
-
+			e.printStackTrace();
 		}
 		return httpConnectorResponse;
 	}
@@ -45,7 +45,6 @@ public class HttpConnector {
 			HttpPost request = new HttpPost(serviceUrl);
 			StringEntity requestEntity = new StringEntity(body);
 			request.setEntity(requestEntity);
-			request.addHeader("content-type", "application/json");
 			if (!CollectionUtils.isEmpty(headeMap)) {
 				headeMap.forEach((k, v) -> {
 					request.addHeader(k, v);
@@ -53,12 +52,11 @@ public class HttpConnector {
 			}
 			CloseableHttpResponse response = httpClient.execute(request);
 			HttpEntity entity = response.getEntity();
-			EntityUtils.consume(entity);
 			String responseObj = EntityUtils.toString(entity, Consts.UTF_8);
 			httpConnectorResponse.setResponse(responseObj);
 			httpConnectorResponse.setErrorCode(response.getStatusLine().getStatusCode());
 		} catch (Exception e) {
-
+			e.printStackTrace();
 		}
 		return httpConnectorResponse;
 	}

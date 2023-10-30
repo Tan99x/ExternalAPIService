@@ -20,10 +20,9 @@ public class ExternalAPIController {
 	@Autowired
 	ExternalService externalService;
 
-	@RequestMapping(value = "/processCard", method = RequestMethod.GET)
-	public ResponseEntity<String> processCard1(@RequestBody CardInfoRequest cardInfoRequest, HttpServletRequest request,
+	@RequestMapping(value = "/processCard", method = RequestMethod.POST)
+	public ResponseEntity<String> processCard(@RequestBody CardInfoRequest cardInfoRequest, HttpServletRequest request,
 			HttpServletResponse response) {
-		
 		String resp = externalService.processCard(cardInfoRequest, request, response);
 		return new ResponseEntity<String>(resp, HttpStatus.OK);
 	}
