@@ -12,7 +12,7 @@ public class TransactionRequestDTO {
 	@JsonProperty("vendorTxCode")
 	private String vendorTxCode;
 	@JsonProperty("amount")
-	private Integer amount;
+	private Double amount;
 	@JsonProperty("currency")
 	private String currency;
 	@JsonProperty("description")
@@ -91,12 +91,12 @@ public class TransactionRequestDTO {
 	}
 
 	@JsonProperty("amount")
-	public Integer getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
 	@JsonProperty("amount")
-	public void setAmount(Integer amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 

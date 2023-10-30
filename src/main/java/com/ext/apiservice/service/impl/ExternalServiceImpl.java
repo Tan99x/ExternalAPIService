@@ -5,7 +5,11 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +37,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @Service
 public class ExternalServiceImpl implements ExternalService {
 
+	private static final Log LOG = LogFactory.getLog(ExternalService.class);
+	
 	@Autowired
 	HttpConnector httpConnector;
 
@@ -57,28 +63,36 @@ public class ExternalServiceImpl implements ExternalService {
 			merchantKeyRequest.setVendorName(prop.getProperty("vendorType"));
 			String body = CommonUtils.dumpObject(merchantKeyRequest);
 			HttpConnectorResponse httpResponse = httpConnector.postApiCall(sessionKeyApiUrl, header, body);
+			System.out.println(httpResponse);
 			if (HttpConnector.isResponseExist(httpResponse)) {
 				MerchantKeyResponse res = gson.fromJson(httpResponse.getResponse(), MerchantKeyResponse.class);
 				System.out.println(res.getExpiry());
 				System.out.println(res.getMerchantSessionKey());
 				String reqBody = CommonUtils.dumpObject(cardInfoRequest);
 				auth = "Bearer " + res.getMerchantSessionKey();
-				Map<String, String> headerMap = new HashMap<>();
 				header.put("Authorization", auth);
-				HttpConnectorResponse cardResp = httpConnector.postApiCall(cardIdentifierApiUrl, headerMap, reqBody);
+				HttpConnectorResponse cardResp = httpConnector.postApiCall(cardIdentifierApiUrl, header, reqBody);
+				System.out.println(cardResp);
 				if (HttpConnector.isResponseExist(httpResponse)) {
 					CardIdentifierResponse cardRes = gson.fromJson(cardResp.getResponse(),
 							CardIdentifierResponse.class);
-
 					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes);
-
 					String txnReqBody = CommonUtils.dumpObject(transactionRequestDTO);
-					HttpConnectorResponse txnResp = httpConnector.postApiCall(cardTxnApiUrl, headerMap, txnReqBody);
+					HttpConnectorResponse txnResp = httpConnector.postApiCall(cardTxnApiUrl, header, txnReqBody);
+					System.out.println(txnResp);
 					if (HttpConnector.isResponseExist(txnResp)) {
 						AutheriseTxnRequestDTO autheriseTxnRequestDTO = new AutheriseTxnRequestDTO();
+						autheriseTxnRequestDTO.setAmount(Double.parseDouble(prop.getProperty("amount")));
+						autheriseTxnRequestDTO.setApplyAvsCvcCheck(prop.getProperty("applyAvsCvcCheck"));
+						autheriseTxnRequestDTO.setCv2(prop.getProperty("cv2"));
+						autheriseTxnRequestDTO.setDescription(prop.getProperty("description"));
+						autheriseTxnRequestDTO.setReferenceTransactionId(UUID.randomUUID().toString());
+						autheriseTxnRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+						autheriseTxnRequestDTO.setVendorTxCode(prop.getProperty("vendorType"));
 						String authReqBody = CommonUtils.dumpObject(autheriseTxnRequestDTO);
-						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, headerMap,
+						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, header,
 								authReqBody);
+						System.out.println(authResp);
 						if (HttpConnector.isResponseExist(authResp)) {
 
 						}
@@ -142,11 +156,21 @@ public class ExternalServiceImpl implements ExternalService {
 				.fromJson("{\r\n" + "        \"cofUsage\": \"First\",\r\n" + "        \"initiatedType\": \"CIT\",\r\n"
 						+ "        \"mitType\": \"Unscheduled\"\r\n" + "\r\n" + "    }", CredentialType.class);
 		transactionRequestDTO.setCredentialType(credentialType);
-		
-		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
-		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
-		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
-		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+
+		transactionRequestDTO.setAmount(Double.parseDouble("1000"));
+		transactionRequestDTO.setCurrency(prop.getProperty("currency"));
+		transactionRequestDTO.setDescription(prop.getProperty("description"));
+		transactionRequestDTO.setSettlementReferenceText(prop.getProperty("settlementReferenceText"));
+		transactionRequestDTO.setCustomerFirstName(prop.getProperty("customerFirstName"));
+		transactionRequestDTO.setCustomerLastName(prop.getProperty("customerLastName"));
+		transactionRequestDTO.setCustomerEmail(prop.getProperty("customerEmail"));
+		transactionRequestDTO.setCustomerMobilePhone(prop.getProperty("customerMobilePhone"));
+		transactionRequestDTO.setCustomerPhone(prop.getProperty("customerPhone"));
+		transactionRequestDTO.setCustomerWorkPhone(prop.getProperty("customerPhone"));
+		transactionRequestDTO.setEntryMethod(prop.getProperty("entryMethod"));
+		transactionRequestDTO.setGiftAid(Boolean.parseBoolean(prop.getProperty("giftAid")));
+		transactionRequestDTO.setApply3DSecure(prop.getProperty("apply3DSecure"));
+		transactionRequestDTO.setApplyAvsCvcCheck(prop.getProperty("applyAvsCvcCheck"));
 		return transactionRequestDTO;
 	}
 

@@ -10,7 +10,7 @@ public class AutheriseTxnRequestDTO {
 	@JsonProperty("vendorTxCode")
 	private String vendorTxCode;
 	@JsonProperty("amount")
-	private Integer amount;
+	private Double amount;
 	@JsonProperty("description")
 	private String description;
 	@JsonProperty("applyAvsCvcCheck")
@@ -49,12 +49,12 @@ public class AutheriseTxnRequestDTO {
 	}
 
 	@JsonProperty("amount")
-	public Integer getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
 	@JsonProperty("amount")
-	public void setAmount(Integer amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 
