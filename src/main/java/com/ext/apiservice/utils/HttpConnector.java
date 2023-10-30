@@ -62,8 +62,8 @@ public class HttpConnector {
 	}
 
 	public static boolean isResponseExist(HttpConnectorResponse httpConnectorResponse) {
-		return Optional.ofNullable(httpConnectorResponse)
-				.filter(p -> p.getErrorCode() == 200 && StringUtils.isNotBlank(p.getResponse())).map(p -> true)
-				.orElse(false);
+		return Optional.ofNullable(httpConnectorResponse).filter(
+				p -> (p.getErrorCode() == 200 || p.getErrorCode() == 201) && StringUtils.isNotBlank(p.getResponse()))
+				.map(p -> true).orElse(false);
 	}
 }
