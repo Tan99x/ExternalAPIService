@@ -72,7 +72,6 @@ public class ExternalServiceImpl implements ExternalService {
 				auth = "Bearer " + res.getMerchantSessionKey();
 				header.put("Authorization", auth);
 				HttpConnectorResponse cardResp = httpConnector.postApiCall(cardIdentifierApiUrl, header, reqBody);
-				System.out.println(cardResp);
 				if (HttpConnector.isResponseExist(httpResponse)) {
 					CardIdentifierResponse cardRes = gson.fromJson(cardResp.getResponse(),
 							CardIdentifierResponse.class);
