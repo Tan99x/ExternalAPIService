@@ -49,9 +49,7 @@ public class ExternalServiceImpl implements ExternalService {
 		Gson gson = new Gson();
 		Properties prop = new Properties();
 		Response finalRes = new Response();
-		finalRes.setDetails("Autherised successfully");
-		finalRes.setErrorCode("200");
-		finalRes.setErrorMsg("SUCCESS");
+		finalRes.setErrorCode("500");
 
 		InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties");
 		try {
@@ -77,7 +75,8 @@ public class ExternalServiceImpl implements ExternalService {
 				if (HttpConnector.isResponseExist(httpResponse)) {
 					CardIdentifierResponse cardRes = gson.fromJson(cardResp.getResponse(),
 							CardIdentifierResponse.class);
-					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes, cardInfoRequest);
+					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes,
+							cardInfoRequest);
 					String txnReqBody = CommonUtils.dumpObject(transactionRequestDTO);
 					auth = "Basic " + prop.getProperty("authToken");
 					header.put("Authorization", auth);
@@ -96,6 +95,9 @@ public class ExternalServiceImpl implements ExternalService {
 						if (HttpConnector.isResponseExist(authResp)) {
 							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
 									AutheriseTxnResponseDTO.class);
+							finalRes.setDetails("Autherised successfully");
+							finalRes.setErrorCode("200");
+							finalRes.setErrorMsg("SUCCESS");
 							return finalRes;
 						}
 					}
