@@ -52,6 +52,8 @@ public class ExternalServiceImpl implements ExternalService {
 		Properties prop = new Properties();
 		Response finalRes = new Response();
 		finalRes.setErrorCode("500");
+		finalRes.setDetails("Autherised failed.");
+		finalRes.setErrorMsg("FAILED");
 		InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties");
 		try {
 			prop.load(stream);
@@ -89,7 +91,7 @@ public class ExternalServiceImpl implements ExternalService {
 						autheriseTxnRequestDTO.setAmount(Integer.parseInt(cardInfoRequest.getAmount()));
 						autheriseTxnRequestDTO.setApplyAvsCvcCheck(prop.getProperty("applyAvsCvcCheck"));
 						autheriseTxnRequestDTO.setCv2(cardInfoRequest.getCardDetails().getSecurityCode());
-						autheriseTxnRequestDTO.setDescription(prop.getProperty("description"));
+						autheriseTxnRequestDTO.setDescription(prop.getProperty("authDescription"));
 						autheriseTxnRequestDTO.setReferenceTransactionId(txnRes.getTransactionId());
 						autheriseTxnRequestDTO.setTransactionType(Constants.TXN_TYPE_AUTHORISE);
 						autheriseTxnRequestDTO.setVendorTxCode(UUID.randomUUID().toString());
@@ -149,7 +151,8 @@ public class ExternalServiceImpl implements ExternalService {
 				+ "        \"browserLanguage\": \"en-GB\",\r\n" + "        \"browserJavaEnabled\": true,\r\n"
 				+ "        \"browserColorDepth\": \"16\",\r\n" + "        \"browserScreenHeight\": \"768\",\r\n"
 				+ "        \"browserScreenWidth\": \"1200\",\r\n" + "        \"browserTZ\": \"+300\",\r\n"
-				+ "        \"acctID\": \"Additional information\",\r\n" + "\r\n"
+				+ "        \"acctID\": \"Additional information\",\r\n"
+				+ "        \"threeDSExemptionIndicator\": \"LowValue\",\r\n"
 				+ "        \"website\": \"https://www.opayolabs.co.uk\"\r\n" + "    }",
 				StrongCustomerAuthentication.class);
 		transactionRequestDTO.setStrongCustomerAuthentication(strongCustomerAuthentication);

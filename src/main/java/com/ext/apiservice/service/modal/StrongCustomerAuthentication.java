@@ -2,24 +2,34 @@ package com.ext.apiservice.service.modal;
 
 public class StrongCustomerAuthentication {
 
-	public String notificationURL;
-	public String browserIP;
-	public String browserAcceptHeader;
-	public boolean browserJavascriptEnabled;
-	public String browserUserAgent;
-	public String challengeWindowSize;
-	public String transType;
-	public String browserLanguage;
-	public boolean browserJavaEnabled;
-	public String browserColorDepth;
-	public String browserScreenHeight;
-	public String browserScreenWidth;
-	public String browserTZ;
-	public String acctID;
-	public String website;
+	private String notificationURL;
+	private String browserIP;
+	private String browserAcceptHeader;
+	private boolean browserJavascriptEnabled;
+	private String browserUserAgent;
+	private String challengeWindowSize;
+	private String transType;
+	private String browserLanguage;
+	private boolean browserJavaEnabled;
+	private String browserColorDepth;
+	private String browserScreenHeight;
+	private String browserScreenWidth;
+	private String browserTZ;
+	private String acctID;
+	private String website;
+	private String threeDSExemptionIndicator;
 
+	
 	public String getNotificationURL() {
 		return notificationURL;
+	}
+
+	public String getThreeDSExemptionIndicator() {
+		return threeDSExemptionIndicator;
+	}
+
+	public void setThreeDSExemptionIndicator(String threeDSExemptionIndicator) {
+		this.threeDSExemptionIndicator = threeDSExemptionIndicator;
 	}
 
 	public void setNotificationURL(String notificationURL) {
