@@ -76,7 +76,7 @@ public class ExternalServiceImpl implements ExternalService {
 				if (HttpConnector.isResponseExist(httpResponse)) {
 					CardIdentifierResponse cardRes = gson.fromJson(cardResp.getResponse(),
 							CardIdentifierResponse.class);
-					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes);
+					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes, cardInfoRequest);
 					String txnReqBody = CommonUtils.dumpObject(transactionRequestDTO);
 					auth = "Basic " + prop.getProperty("authToken");
 					header.put("Authorization", auth);
@@ -84,12 +84,12 @@ public class ExternalServiceImpl implements ExternalService {
 					System.out.println(txnResp);
 					if (HttpConnector.isResponseExist(txnResp)) {
 						AutheriseTxnRequestDTO autheriseTxnRequestDTO = new AutheriseTxnRequestDTO();
-						autheriseTxnRequestDTO.setAmount(Integer.parseInt(prop.getProperty("amount")));
+						autheriseTxnRequestDTO.setAmount(Integer.parseInt(cardInfoRequest.getAmount()));
 						autheriseTxnRequestDTO.setApplyAvsCvcCheck(prop.getProperty("applyAvsCvcCheck"));
 						autheriseTxnRequestDTO.setCv2(prop.getProperty("cv2"));
 						autheriseTxnRequestDTO.setDescription(prop.getProperty("description"));
 						autheriseTxnRequestDTO.setReferenceTransactionId(UUID.randomUUID().toString());
-						autheriseTxnRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+						autheriseTxnRequestDTO.setTransactionType(cardInfoRequest.getTransactionType());
 						autheriseTxnRequestDTO.setVendorTxCode(prop.getProperty("vendorType"));
 						String authReqBody = CommonUtils.dumpObject(autheriseTxnRequestDTO);
 						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, header, authReqBody);
@@ -111,11 +111,11 @@ public class ExternalServiceImpl implements ExternalService {
 	}
 
 	private TransactionRequestDTO getTransactionRequestDTO(Properties prop, MerchantKeyResponse res,
-			CardIdentifierResponse cardRes) {
+			CardIdentifierResponse cardRes, CardInfoRequest cardInfoRequest) {
 		Gson gson = new Gson();
 
 		TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO();
-		transactionRequestDTO.setTransactionType(prop.getProperty("transactionType"));
+		transactionRequestDTO.setTransactionType(cardInfoRequest.getTransactionType());
 		transactionRequestDTO.setVendorName(prop.getProperty("vendorType"));
 		PaymentMethod paymentMethod = new PaymentMethod();
 		Card card = getCard(res, cardRes);
@@ -159,7 +159,7 @@ public class ExternalServiceImpl implements ExternalService {
 				.fromJson("{\r\n" + "        \"cofUsage\": \"First\",\r\n" + "        \"initiatedType\": \"CIT\",\r\n"
 						+ "        \"mitType\": \"Unscheduled\"\r\n" + "\r\n" + "    }", CredentialType.class);
 		transactionRequestDTO.setCredentialType(credentialType);
-		transactionRequestDTO.setAmount(Integer.parseInt(prop.getProperty("amount")));
+		transactionRequestDTO.setAmount(Integer.parseInt(cardInfoRequest.getAmount()));
 		transactionRequestDTO.setCurrency(prop.getProperty("currency"));
 		transactionRequestDTO.setDescription(prop.getProperty("description"));
 		transactionRequestDTO.setSettlementReferenceText(prop.getProperty("settlementReferenceText"));

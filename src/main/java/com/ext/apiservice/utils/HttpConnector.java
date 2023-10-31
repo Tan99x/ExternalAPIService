@@ -41,6 +41,10 @@ public class HttpConnector {
 
 	public HttpConnectorResponse postApiCall(String serviceUrl, Map<String, String> headeMap, String body) {
 		HttpConnectorResponse httpConnectorResponse = new HttpConnectorResponse();
+		System.out.println("**************************************************");
+		System.out.println("**************************************************");
+		System.out.println("URL:: " + serviceUrl);
+		System.out.println("Request Body :: " + body);
 		try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
 			HttpPost request = new HttpPost(serviceUrl);
 			StringEntity requestEntity = new StringEntity(body);
@@ -55,6 +59,9 @@ public class HttpConnector {
 			String responseObj = EntityUtils.toString(entity, Consts.UTF_8);
 			httpConnectorResponse.setResponse(responseObj);
 			httpConnectorResponse.setErrorCode(response.getStatusLine().getStatusCode());
+			System.out.println("Resonse Body :: " + responseObj);
+			System.out.println("**************************************************");
+			System.out.println("**************************************************");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
