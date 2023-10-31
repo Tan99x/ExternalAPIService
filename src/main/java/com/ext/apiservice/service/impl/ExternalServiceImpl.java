@@ -63,11 +63,8 @@ public class ExternalServiceImpl implements ExternalService {
 			merchantKeyRequest.setVendorName(prop.getProperty("vendorType"));
 			String body = CommonUtils.dumpObject(merchantKeyRequest);
 			HttpConnectorResponse httpResponse = httpConnector.postApiCall(sessionKeyApiUrl, header, body);
-			System.out.println(httpResponse);
 			if (HttpConnector.isResponseExist(httpResponse)) {
 				MerchantKeyResponse res = gson.fromJson(httpResponse.getResponse(), MerchantKeyResponse.class);
-				System.out.println(res.getExpiry());
-				System.out.println(res.getMerchantSessionKey());
 				String reqBody = CommonUtils.dumpObject(cardInfoRequest);
 				auth = "Bearer " + res.getMerchantSessionKey();
 				header.put("Authorization", auth);
@@ -80,7 +77,6 @@ public class ExternalServiceImpl implements ExternalService {
 					auth = "Basic " + prop.getProperty("authToken");
 					header.put("Authorization", auth);
 					HttpConnectorResponse txnResp = httpConnector.postApiCall(cardTxnApiUrl, header, txnReqBody);
-					System.out.println(txnResp);
 					if (HttpConnector.isResponseExist(txnResp)) {
 						AutheriseTxnRequestDTO autheriseTxnRequestDTO = new AutheriseTxnRequestDTO();
 						autheriseTxnRequestDTO.setAmount(Integer.parseInt(cardInfoRequest.getAmount()));
@@ -92,7 +88,6 @@ public class ExternalServiceImpl implements ExternalService {
 						autheriseTxnRequestDTO.setVendorTxCode(prop.getProperty("vendorType"));
 						String authReqBody = CommonUtils.dumpObject(autheriseTxnRequestDTO);
 						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, header, authReqBody);
-						System.out.println(authResp);
 						if (HttpConnector.isResponseExist(authResp)) {
 							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
 									AutheriseTxnResponseDTO.class);
