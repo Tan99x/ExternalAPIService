@@ -27,7 +27,9 @@ import com.ext.apiservice.service.modal.Response;
 import com.ext.apiservice.service.modal.ShippingDetails;
 import com.ext.apiservice.service.modal.StrongCustomerAuthentication;
 import com.ext.apiservice.service.modal.TransactionRequestDTO;
+import com.ext.apiservice.service.modal.TransactionResponseDTO;
 import com.ext.apiservice.utils.CommonUtils;
+import com.ext.apiservice.utils.Constants;
 import com.ext.apiservice.utils.HttpConnector;
 import com.ext.apiservice.utils.HttpConnectorResponse;
 import com.google.gson.Gson;
@@ -50,7 +52,6 @@ public class ExternalServiceImpl implements ExternalService {
 		Properties prop = new Properties();
 		Response finalRes = new Response();
 		finalRes.setErrorCode("500");
-
 		InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties");
 		try {
 			prop.load(stream);
@@ -82,19 +83,22 @@ public class ExternalServiceImpl implements ExternalService {
 					header.put("Authorization", auth);
 					HttpConnectorResponse txnResp = httpConnector.postApiCall(cardTxnApiUrl, header, txnReqBody);
 					if (HttpConnector.isResponseExist(txnResp)) {
+						TransactionResponseDTO txnRes = gson.fromJson(txnResp.getResponse(),
+								TransactionResponseDTO.class);
 						AutheriseTxnRequestDTO autheriseTxnRequestDTO = new AutheriseTxnRequestDTO();
 						autheriseTxnRequestDTO.setAmount(Integer.parseInt(cardInfoRequest.getAmount()));
 						autheriseTxnRequestDTO.setApplyAvsCvcCheck(prop.getProperty("applyAvsCvcCheck"));
-						autheriseTxnRequestDTO.setCv2(prop.getProperty("cv2"));
+						autheriseTxnRequestDTO.setCv2(cardInfoRequest.getCardDetails().getSecurityCode());
 						autheriseTxnRequestDTO.setDescription(prop.getProperty("description"));
-						autheriseTxnRequestDTO.setReferenceTransactionId(UUID.randomUUID().toString());
-						autheriseTxnRequestDTO.setTransactionType(cardInfoRequest.getTransactionType());
-						autheriseTxnRequestDTO.setVendorTxCode(prop.getProperty("vendorType"));
+						autheriseTxnRequestDTO.setReferenceTransactionId(txnRes.getTransactionId());
+						autheriseTxnRequestDTO.setTransactionType(Constants.TXN_TYPE_AUTHORISE);
+						autheriseTxnRequestDTO.setVendorTxCode(UUID.randomUUID().toString());
 						String authReqBody = CommonUtils.dumpObject(autheriseTxnRequestDTO);
 						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, header, authReqBody);
 						if (HttpConnector.isResponseExist(authResp)) {
 							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
 									AutheriseTxnResponseDTO.class);
+							System.out.println(authRes.getAcsUrl());
 							finalRes.setDetails("Autherised successfully");
 							finalRes.setErrorCode("200");
 							finalRes.setErrorMsg("SUCCESS");
@@ -116,13 +120,13 @@ public class ExternalServiceImpl implements ExternalService {
 		Gson gson = new Gson();
 
 		TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO();
-		transactionRequestDTO.setTransactionType(cardInfoRequest.getTransactionType());
+		transactionRequestDTO.setTransactionType(Constants.TXN_TYPE_AUTHENTICATE);
 		transactionRequestDTO.setVendorName(prop.getProperty("vendorType"));
 		PaymentMethod paymentMethod = new PaymentMethod();
 		Card card = getCard(res, cardRes);
 		paymentMethod.setCard(card);
 		transactionRequestDTO.setPaymentMethod(paymentMethod);
-		transactionRequestDTO.setVendorTxCode(cardRes.getCardType());
+		transactionRequestDTO.setVendorTxCode(UUID.randomUUID().toString());
 		ShippingDetails shippingDetails = gson.fromJson(
 				"{\r\n" + "        \"recipientFirstName\": \"shippingFname\",\r\n"
 						+ "        \"recipientLastName\": \"shippingLName\",\r\n"
@@ -174,6 +178,7 @@ public class ExternalServiceImpl implements ExternalService {
 		transactionRequestDTO.setGiftAid(Boolean.parseBoolean(prop.getProperty("giftAid")));
 		transactionRequestDTO.setApply3DSecure(prop.getProperty("apply3DSecure"));
 		transactionRequestDTO.setApplyAvsCvcCheck(prop.getProperty("applyAvsCvcCheck"));
+		transactionRequestDTO.setReferrerId(UUID.randomUUID().toString());
 		return transactionRequestDTO;
 	}
 

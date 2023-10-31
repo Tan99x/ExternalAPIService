@@ -10,8 +10,6 @@ public class CardInfoRequest {
 
 	private CardDetails cardDetails;
 
-	private String transactionType;
-
 	private String amount;
 
 	public CardDetails getCardDetails() {
@@ -20,20 +18,6 @@ public class CardInfoRequest {
 
 	public void setCardDetails(CardDetails cardDetails) {
 		this.cardDetails = cardDetails;
-	}
-
-	/**
-	 * @return the transactionType
-	 */
-	public String getTransactionType() {
-		return transactionType;
-	}
-
-	/**
-	 * @param transactionType the transactionType to set
-	 */
-	public void setTransactionType(String transactionType) {
-		this.transactionType = transactionType;
 	}
 
 	/**

@@ -60,7 +60,8 @@ public class HttpConnector {
 			httpConnectorResponse.setResponse(responseObj);
 			httpConnectorResponse.setErrorCode(response.getStatusLine().getStatusCode());
 			System.out.println("Resonse Body :: " + responseObj);
-			System.out.println("****************************************************************************************");
+			System.out.println(
+					"****************************************************************************************");
 			System.out.println("");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,7 +71,8 @@ public class HttpConnector {
 
 	public static boolean isResponseExist(HttpConnectorResponse httpConnectorResponse) {
 		return Optional.ofNullable(httpConnectorResponse)
-				.filter(p -> (p.getErrorCode() == 200 || p.getErrorCode() == 201 || p.getErrorCode() == 2021)
+				.filter(p -> (p.getErrorCode() == 200 || p.getErrorCode() == 201 || p.getErrorCode() == 202
+						|| p.getErrorCode() == 2021 || p.getErrorCode() == 2011)
 						&& StringUtils.isNotBlank(p.getResponse()))
 				.map(p -> true).orElse(false);
 	}
