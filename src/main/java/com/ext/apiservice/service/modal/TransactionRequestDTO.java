@@ -48,6 +48,8 @@ public class TransactionRequestDTO {
 	@JsonProperty("credentialType")
 	private CredentialType credentialType;
 
+	private StrongCustomerAuthentication strongCustomerAuthentication;
+
 	@JsonProperty("transactionType")
 	public String getTransactionType() {
 		return transactionType;
@@ -266,6 +268,14 @@ public class TransactionRequestDTO {
 	@JsonProperty("credentialType")
 	public void setCredentialType(CredentialType credentialType) {
 		this.credentialType = credentialType;
+	}
+
+	public StrongCustomerAuthentication getStrongCustomerAuthentication() {
+		return strongCustomerAuthentication;
+	}
+
+	public void setStrongCustomerAuthentication(StrongCustomerAuthentication strongCustomerAuthentication) {
+		this.strongCustomerAuthentication = strongCustomerAuthentication;
 	}
 
 }

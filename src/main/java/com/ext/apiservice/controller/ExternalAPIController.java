@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ext.apiservice.service.ExternalService;
 import com.ext.apiservice.service.modal.CardInfoRequest;
+import com.ext.apiservice.service.modal.Response;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,10 +22,10 @@ public class ExternalAPIController {
 	ExternalService externalService;
 
 	@RequestMapping(value = "/processCard", method = RequestMethod.POST)
-	public ResponseEntity<String> processCard(@RequestBody CardInfoRequest cardInfoRequest, HttpServletRequest request,
+	public ResponseEntity<Response> processCard(@RequestBody CardInfoRequest cardInfoRequest, HttpServletRequest request,
 			HttpServletResponse response) {
-		String resp = externalService.processCard(cardInfoRequest, request, response);
-		return new ResponseEntity<String>(resp, HttpStatus.OK);
+		Response resp = externalService.processCard(cardInfoRequest, request, response);
+		return new ResponseEntity<Response>(resp, HttpStatus.OK);
 	}
 
 }

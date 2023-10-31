@@ -41,6 +41,10 @@ public class HttpConnector {
 
 	public HttpConnectorResponse postApiCall(String serviceUrl, Map<String, String> headeMap, String body) {
 		HttpConnectorResponse httpConnectorResponse = new HttpConnectorResponse();
+		System.out.println("****************************************************************************************");
+		System.out.println("URL:: " + serviceUrl);
+		System.out.println("****************************************************************************************");
+		System.out.println("Request Body :: " + body);
 		try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
 			HttpPost request = new HttpPost(serviceUrl);
 			StringEntity requestEntity = new StringEntity(body);
@@ -55,6 +59,10 @@ public class HttpConnector {
 			String responseObj = EntityUtils.toString(entity, Consts.UTF_8);
 			httpConnectorResponse.setResponse(responseObj);
 			httpConnectorResponse.setErrorCode(response.getStatusLine().getStatusCode());
+			System.out.println("Resonse Body :: " + responseObj);
+			System.out.println(
+					"****************************************************************************************");
+			System.out.println("");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -63,7 +71,9 @@ public class HttpConnector {
 
 	public static boolean isResponseExist(HttpConnectorResponse httpConnectorResponse) {
 		return Optional.ofNullable(httpConnectorResponse)
-				.filter(p -> p.getErrorCode() == 200 && StringUtils.isNotBlank(p.getResponse())).map(p -> true)
-				.orElse(false);
+				.filter(p -> (p.getErrorCode() == 200 || p.getErrorCode() == 201 || p.getErrorCode() == 202
+						|| p.getErrorCode() == 2021 || p.getErrorCode() == 2011)
+						&& StringUtils.isNotBlank(p.getResponse()))
+				.map(p -> true).orElse(false);
 	}
 }
