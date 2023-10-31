@@ -23,6 +23,7 @@ import com.ext.apiservice.service.modal.CredentialType;
 import com.ext.apiservice.service.modal.MerchantKeyRequest;
 import com.ext.apiservice.service.modal.MerchantKeyResponse;
 import com.ext.apiservice.service.modal.PaymentMethod;
+import com.ext.apiservice.service.modal.Response;
 import com.ext.apiservice.service.modal.ShippingDetails;
 import com.ext.apiservice.service.modal.StrongCustomerAuthentication;
 import com.ext.apiservice.service.modal.TransactionRequestDTO;
@@ -43,10 +44,14 @@ public class ExternalServiceImpl implements ExternalService {
 	HttpConnector httpConnector;
 
 	@Override
-	public String processCard(CardInfoRequest cardInfoRequest, HttpServletRequest request,
+	public Response processCard(CardInfoRequest cardInfoRequest, HttpServletRequest request,
 			HttpServletResponse response) {
 		Gson gson = new Gson();
 		Properties prop = new Properties();
+		Response finalRes = new Response();
+		finalRes.setDetails("Autherised successfully");
+		finalRes.setErrorCode("200");
+		finalRes.setErrorMsg("SUCCESS");
 
 		InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties");
 		try {
@@ -91,7 +96,7 @@ public class ExternalServiceImpl implements ExternalService {
 						if (HttpConnector.isResponseExist(authResp)) {
 							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
 									AutheriseTxnResponseDTO.class);
-							return authRes.getAcsUrl();
+							return finalRes;
 						}
 					}
 				}
@@ -101,7 +106,7 @@ public class ExternalServiceImpl implements ExternalService {
 			e.printStackTrace();
 
 		}
-		return null;
+		return finalRes;
 	}
 
 	private TransactionRequestDTO getTransactionRequestDTO(Properties prop, MerchantKeyResponse res,
