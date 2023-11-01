@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ext.apiservice.service.ExternalService;
-import com.ext.apiservice.service.modal.CardDetails;
 import com.ext.apiservice.service.modal.CardInfoRequest;
 import com.ext.apiservice.service.modal.RefundRequestDTO;
 import com.ext.apiservice.service.modal.Response;
