@@ -24,6 +24,7 @@ import com.ext.apiservice.service.modal.MerchantKeyRequest;
 import com.ext.apiservice.service.modal.MerchantKeyResponse;
 import com.ext.apiservice.service.modal.PaymentMethod;
 import com.ext.apiservice.service.modal.RefundTxnRequestDTO;
+import com.ext.apiservice.service.modal.RefundTxnResponseDTO;
 import com.ext.apiservice.service.modal.Response;
 import com.ext.apiservice.service.modal.ShippingDetails;
 import com.ext.apiservice.service.modal.StrongCustomerAuthentication;
@@ -169,9 +170,8 @@ public class ExternalServiceImpl implements ExternalService {
 						String authReqBody = CommonUtils.dumpObject(refundTxnRequestDTO);
 						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, header, authReqBody);
 						if (HttpConnector.isResponseExist(authResp)) {
-							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
-									AutheriseTxnResponseDTO.class);
-							System.out.println(authRes.getAcsUrl());
+							RefundTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
+									RefundTxnResponseDTO.class);
 							finalRes.setDetails("Refund successfully");
 							finalRes.setErrorCode("200");
 							finalRes.setErrorMsg("SUCCESS");
