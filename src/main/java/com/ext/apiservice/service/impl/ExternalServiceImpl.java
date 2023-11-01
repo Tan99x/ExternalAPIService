@@ -104,7 +104,6 @@ public class ExternalServiceImpl implements ExternalService {
 						if (HttpConnector.isResponseExist(authResp)) {
 							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
 									AutheriseTxnResponseDTO.class);
-							System.out.println(authRes.getAcsUrl());
 							finalRes.setDetails("Autherised successfully");
 							finalRes.setErrorCode("200");
 							finalRes.setErrorMsg("SUCCESS");
