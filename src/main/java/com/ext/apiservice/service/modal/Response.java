@@ -11,6 +11,7 @@ public class Response {
 	private String errorCode;
 	private String errorMsg;
 	private String details;
+	private Data data;
 
 	/**
 	 * @return the errorCode
@@ -52,6 +53,14 @@ public class Response {
 	 */
 	public void setDetails(String details) {
 		this.details = details;
+	}
+
+	public Data getData() {
+		return data;
+	}
+
+	public void setData(Data data) {
+		this.data = data;
 	}
 
 }

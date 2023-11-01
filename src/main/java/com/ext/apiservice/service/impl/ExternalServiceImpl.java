@@ -20,6 +20,7 @@ import com.ext.apiservice.service.modal.Card;
 import com.ext.apiservice.service.modal.CardIdentifierResponse;
 import com.ext.apiservice.service.modal.CardInfoRequest;
 import com.ext.apiservice.service.modal.CredentialType;
+import com.ext.apiservice.service.modal.Data;
 import com.ext.apiservice.service.modal.MerchantKeyRequest;
 import com.ext.apiservice.service.modal.MerchantKeyResponse;
 import com.ext.apiservice.service.modal.PaymentMethod;
@@ -82,7 +83,7 @@ public class ExternalServiceImpl implements ExternalService {
 					CardIdentifierResponse cardRes = gson.fromJson(cardResp.getResponse(),
 							CardIdentifierResponse.class);
 					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes,
-							cardInfoRequest, Constants.TXN_TYPE_AUTHORISE);
+							cardInfoRequest, Constants.TXN_TYPE_AUTHENTICATE);
 					String txnReqBody = CommonUtils.dumpObject(transactionRequestDTO);
 					auth = "Basic " + prop.getProperty("authToken");
 					header.put("Authorization", auth);
@@ -103,10 +104,13 @@ public class ExternalServiceImpl implements ExternalService {
 						if (HttpConnector.isResponseExist(authResp)) {
 							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
 									AutheriseTxnResponseDTO.class);
-							System.out.println(authRes.getAcsUrl());
 							finalRes.setDetails("Autherised successfully");
 							finalRes.setErrorCode("200");
 							finalRes.setErrorMsg("SUCCESS");
+							Data data = new Data();
+							data.setTransactionId(authRes.getTransactionId());
+							data.setTransactionType(authRes.getTransactionType());
+							finalRes.setData(data);
 							return finalRes;
 						}
 					}

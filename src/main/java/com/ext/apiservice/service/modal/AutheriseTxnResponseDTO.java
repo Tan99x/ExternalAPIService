@@ -4,7 +4,7 @@ public class AutheriseTxnResponseDTO {
 	public String statusCode;
 	public String statusDetail;
 	public String transactionId;
-	public String acsUrl;
+	public String transactionType;
 	public String acsTransId;
 	public String dsTransId;
 	public String status;
@@ -34,12 +34,12 @@ public class AutheriseTxnResponseDTO {
 		this.transactionId = transactionId;
 	}
 
-	public String getAcsUrl() {
-		return acsUrl;
+	public String getTransactionType() {
+		return transactionType;
 	}
 
-	public void setAcsUrl(String acsUrl) {
-		this.acsUrl = acsUrl;
+	public void getTransactionType(String v) {
+		this.transactionType = transactionType;
 	}
 
 	public String getAcsTransId() {
