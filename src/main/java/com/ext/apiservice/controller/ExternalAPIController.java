@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ext.apiservice.service.ExternalService;
+import com.ext.apiservice.service.modal.CardDetails;
 import com.ext.apiservice.service.modal.CardInfoRequest;
 import com.ext.apiservice.service.modal.Response;
 
@@ -25,6 +26,22 @@ public class ExternalAPIController {
 	public ResponseEntity<Response> processCard(@RequestBody CardInfoRequest cardInfoRequest, HttpServletRequest request,
 			HttpServletResponse response) {
 		Response resp = externalService.processCard(cardInfoRequest, request, response);
+		return new ResponseEntity<Response>(resp, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/processrefund", method = RequestMethod.GET)
+	public ResponseEntity<Response> processRefund(HttpServletRequest request, HttpServletResponse response) {
+		CardInfoRequest cardInfoRequest = new CardInfoRequest();
+		cardInfoRequest.setAmount("1000");
+
+		CardDetails card = new CardDetails();
+		card.setCardholderName("Squarepants");
+		card.setCardNumber("4929000000006");
+		card.setExpiryDate("1130");
+		card.setSecurityCode("123");
+		cardInfoRequest.setCardDetails(card);
+
+		Response resp = externalService.processRefund(cardInfoRequest, request, response);
 		return new ResponseEntity<Response>(resp, HttpStatus.OK);
 	}
 

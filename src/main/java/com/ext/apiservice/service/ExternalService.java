@@ -10,4 +10,7 @@ public interface ExternalService {
 	public Response processCard(CardInfoRequest cardInfoRequest, HttpServletRequest request,
 			HttpServletResponse response);
 
+	public Response processRefund(CardInfoRequest cardInfoRequest, HttpServletRequest request,
+			HttpServletResponse response);
+
 }

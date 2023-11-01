@@ -59,7 +59,7 @@ public class HttpConnector {
 			String responseObj = EntityUtils.toString(entity, Consts.UTF_8);
 			httpConnectorResponse.setResponse(responseObj);
 			httpConnectorResponse.setErrorCode(response.getStatusLine().getStatusCode());
-			System.out.println("Resonse Body :: " + responseObj);
+			System.out.println("Response Body :: " + responseObj);
 			System.out.println(
 					"****************************************************************************************");
 			System.out.println("");

@@ -23,6 +23,7 @@ import com.ext.apiservice.service.modal.CredentialType;
 import com.ext.apiservice.service.modal.MerchantKeyRequest;
 import com.ext.apiservice.service.modal.MerchantKeyResponse;
 import com.ext.apiservice.service.modal.PaymentMethod;
+import com.ext.apiservice.service.modal.RefundTxnRequestDTO;
 import com.ext.apiservice.service.modal.Response;
 import com.ext.apiservice.service.modal.ShippingDetails;
 import com.ext.apiservice.service.modal.StrongCustomerAuthentication;
@@ -79,7 +80,7 @@ public class ExternalServiceImpl implements ExternalService {
 					CardIdentifierResponse cardRes = gson.fromJson(cardResp.getResponse(),
 							CardIdentifierResponse.class);
 					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes,
-							cardInfoRequest);
+							cardInfoRequest, Constants.TXN_TYPE_AUTHORISE);
 					String txnReqBody = CommonUtils.dumpObject(transactionRequestDTO);
 					auth = "Basic " + prop.getProperty("authToken");
 					header.put("Authorization", auth);
@@ -116,13 +117,83 @@ public class ExternalServiceImpl implements ExternalService {
 		}
 		return finalRes;
 	}
+	
+	@Override
+	public Response processRefund(CardInfoRequest cardInfoRequest, HttpServletRequest request,
+			HttpServletResponse response) {
+		Gson gson = new Gson();
+		Properties prop = new Properties();
+		Response finalRes = new Response();
+		finalRes.setErrorCode("500");
+		finalRes.setDetails("Refund failed.");
+		finalRes.setErrorMsg("FAILED");
+		InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties");
+		try {
+			prop.load(stream);
+			String sessionKeyApiUrl = prop.getProperty("sessionKeyApiUrl");
+			String cardIdentifierApiUrl = prop.getProperty("cardIdentifierApiUrl");
+			String cardTxnApiUrl = prop.getProperty("cardTxnApiUrl");
+
+			MerchantKeyRequest merchantKeyRequest = new MerchantKeyRequest();
+			Map<String, String> header = new HashMap<>();
+			header.put("Content-Type", "application/json");
+			String auth = "Basic " + prop.getProperty("authToken");
+			header.put("Authorization", auth);
+			merchantKeyRequest.setVendorName(prop.getProperty("vendorType"));
+			String body = CommonUtils.dumpObject(merchantKeyRequest);
+			HttpConnectorResponse httpResponse = httpConnector.postApiCall(sessionKeyApiUrl, header, body);
+			if (HttpConnector.isResponseExist(httpResponse)) {
+				MerchantKeyResponse res = gson.fromJson(httpResponse.getResponse(), MerchantKeyResponse.class);
+				String reqBody = CommonUtils.dumpObject(cardInfoRequest);
+				auth = "Bearer " + res.getMerchantSessionKey();
+				header.put("Authorization", auth);
+				HttpConnectorResponse cardResp = httpConnector.postApiCall(cardIdentifierApiUrl, header, reqBody);
+				if (HttpConnector.isResponseExist(httpResponse)) {
+					CardIdentifierResponse cardRes = gson.fromJson(cardResp.getResponse(),
+							CardIdentifierResponse.class);
+					TransactionRequestDTO transactionRequestDTO = getTransactionRequestDTO(prop, res, cardRes,
+							cardInfoRequest, Constants.TXN_TYPE_PAYMENT);
+					String txnReqBody = CommonUtils.dumpObject(transactionRequestDTO);
+					auth = "Basic " + prop.getProperty("authToken");
+					header.put("Authorization", auth);
+					HttpConnectorResponse txnResp = httpConnector.postApiCall(cardTxnApiUrl, header, txnReqBody);
+					if (HttpConnector.isResponseExist(txnResp)) {
+						TransactionResponseDTO txnRes = gson.fromJson(txnResp.getResponse(),
+								TransactionResponseDTO.class);
+						RefundTxnRequestDTO refundTxnRequestDTO = new RefundTxnRequestDTO();
+						refundTxnRequestDTO.setAmount(Integer.parseInt(cardInfoRequest.getAmount()));
+						refundTxnRequestDTO.setDescription("Demo Refund");
+						refundTxnRequestDTO.setReferenceTransactionId(txnRes.getTransactionId());
+						refundTxnRequestDTO.setTransactionType(Constants.TXN_TYPE_REFUND);
+						refundTxnRequestDTO.setVendorTxCode(UUID.randomUUID().toString());
+						String authReqBody = CommonUtils.dumpObject(refundTxnRequestDTO);
+						HttpConnectorResponse authResp = httpConnector.postApiCall(cardTxnApiUrl, header, authReqBody);
+						if (HttpConnector.isResponseExist(authResp)) {
+							AutheriseTxnResponseDTO authRes = gson.fromJson(authResp.getResponse(),
+									AutheriseTxnResponseDTO.class);
+							System.out.println(authRes.getAcsUrl());
+							finalRes.setDetails("Refund successfully");
+							finalRes.setErrorCode("200");
+							finalRes.setErrorMsg("SUCCESS");
+							return finalRes;
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+		}
+		return finalRes;
+	}
 
 	private TransactionRequestDTO getTransactionRequestDTO(Properties prop, MerchantKeyResponse res,
-			CardIdentifierResponse cardRes, CardInfoRequest cardInfoRequest) {
+			CardIdentifierResponse cardRes, CardInfoRequest cardInfoRequest , String txnType) {
 		Gson gson = new Gson();
 
 		TransactionRequestDTO transactionRequestDTO = new TransactionRequestDTO();
-		transactionRequestDTO.setTransactionType(Constants.TXN_TYPE_AUTHENTICATE);
+		transactionRequestDTO.setTransactionType(txnType);
 		transactionRequestDTO.setVendorName(prop.getProperty("vendorType"));
 		PaymentMethod paymentMethod = new PaymentMethod();
 		Card card = getCard(res, cardRes);
