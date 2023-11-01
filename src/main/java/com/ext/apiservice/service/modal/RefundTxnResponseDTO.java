@@ -8,8 +8,8 @@ public class RefundTxnResponseDTO {
 	private String transactionType;
 	private float retrievalReference;
 	private String bankAuthorisationCode;
-	private PaymentMethod PaymentMethodObject;
-	private Amount AmountObject;
+	private PaymentMethod paymentMethod;
+	private Amount amount;
 	private String currency;
 	private String settlementReferenceText;
 	private String status;
@@ -99,31 +99,31 @@ public class RefundTxnResponseDTO {
 	}
 
 	/**
-	 * @return the paymentMethodObject
+	 * @return the paymentMethod
 	 */
-	public PaymentMethod getPaymentMethodObject() {
-		return PaymentMethodObject;
+	public PaymentMethod getPaymentMethod() {
+		return paymentMethod;
 	}
 
 	/**
-	 * @param paymentMethodObject the paymentMethodObject to set
+	 * @param paymentMethod the paymentMethod to set
 	 */
-	public void setPaymentMethodObject(PaymentMethod paymentMethodObject) {
-		PaymentMethodObject = paymentMethodObject;
+	public void setPaymentMethod(PaymentMethod paymentMethod) {
+		this.paymentMethod = paymentMethod;
 	}
 
 	/**
-	 * @return the amountObject
+	 * @return the amount
 	 */
-	public Amount getAmountObject() {
-		return AmountObject;
+	public Amount getAmount() {
+		return amount;
 	}
 
 	/**
-	 * @param amountObject the amountObject to set
+	 * @param amount the amount to set
 	 */
-	public void setAmountObject(Amount amountObject) {
-		AmountObject = amountObject;
+	public void setAmount(Amount amount) {
+		this.amount = amount;
 	}
 
 	/**
