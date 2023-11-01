@@ -30,8 +30,8 @@ public class ExternalAPIController {
 	}
 
 	@RequestMapping(value = "/process-refund", method = RequestMethod.POST)
-	public ResponseEntity<Response> processRefund(RefundRequestDTO refundRequestDTO, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ResponseEntity<Response> processRefund(@RequestBody RefundRequestDTO refundRequestDTO,
+			HttpServletRequest request, HttpServletResponse response) {
 		Response resp = externalService.processRefund(refundRequestDTO, request, response);
 		return new ResponseEntity<Response>(resp, HttpStatus.OK);
 	}
